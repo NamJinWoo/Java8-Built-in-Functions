@@ -43,16 +43,17 @@ public class CuteInterpreter {
 	}
 
 	private Node runFunction(FunctionNode operator, ListNode operand) {
+		
 		switch (operator.value) {// 바꿈.
 		// CAR, CDR, CONS등에 대한 동작 구현
 		case CAR:
-			return ((ListNode) ((QuoteNode) operand.car()).nodeInside()).car();
+			return ((ListNode) runQuote(operand)).car();
 		// return operand.car();
 		case CDR:
-			return new QuoteNode(((ListNode) ((QuoteNode) operand.car()).nodeInside()).cdr());
+			return new QuoteNode(((ListNode) runQuote(operand)).cdr());
 		case CONS:
 			if ((Node) operand.car() instanceof QuoteNode) {
-				ListNode a = (ListNode) ((QuoteNode) operand.car()).nodeInside();
+				ListNode a = (ListNode) runQuote(operand);
 				ListNode x = (ListNode) ((QuoteNode) operand.cdr().car()).nodeInside();
 
 				return new QuoteNode(ListNode.cons(a, x));
@@ -60,32 +61,27 @@ public class CuteInterpreter {
 				return new QuoteNode(
 						ListNode.cons((Node) operand.car(), (ListNode) ((QuoteNode) operand.cdr().car()).nodeInside()));
 		case NULL_Q:
-			if (((ListNode) ((QuoteNode) operand.car()).nodeInside()).equals(ListNode.ENDLIST)) {
+			if (((ListNode) runQuote(operand)).equals(ListNode.ENDLIST)) {
 				return BooleanNode.TRUE_NODE;
 			} else {
 				return BooleanNode.FALSE_NODE;
 			}
 		case ATOM_Q:
-			// return ((QuoteNode)operand.car()).nodeInside();
-			if (((QuoteNode) operand.car()).nodeInside() instanceof ListNode) {
+			if ((runQuote(operand)) instanceof ListNode) {
 				return BooleanNode.FALSE_NODE;
 			} else
 				return BooleanNode.TRUE_NODE;
 		case EQ_Q:
-			Node x = ((QuoteNode) operand.car()).nodeInside();
+			Node x = runQuote(operand);
 			Node y = ((QuoteNode) operand.cdr().car()).nodeInside();
-			// return ((QuoteNode)operand.car()).nodeInside();
 			if (x.toString().equals(y.toString())) {
 				return BooleanNode.TRUE_NODE;
 			} else
 				return BooleanNode.FALSE_NODE;
 		case COND:
 			ListNode c = operand;
-//			ListNode k = (ListNode) runExpr(c);
 			while (!c.equals(ListNode.ENDLIST)) {
-				
 				if (runExpr(((ListNode)c.car()).car()).equals(BooleanNode.TRUE_NODE)) {
-					
 					return ((ListNode)c.car()).cdr().car();
 				}
 				else {
@@ -93,8 +89,6 @@ public class CuteInterpreter {
 				}
 			}
 			return null;
-			// return k.car();
-			// return runExpr(c);
 		case NOT:
 			Node a = operand.car();
 			if (runExpr(a).equals(BooleanNode.TRUE_NODE)) {

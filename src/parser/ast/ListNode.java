@@ -30,6 +30,7 @@ public interface ListNode extends Node {
 		public ListNode cdr() {
 			return null;
 		}
+		
 	};
 	static ListNode ENDLIST = new ListNode() {
 		@Override
